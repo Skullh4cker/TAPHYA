@@ -1,0 +1,251 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ParsingHelper {
+    private static final char[] whitelistChars = new char[] {'Y', 'X', 'W', 'U', 'D', 'н', 'к'};
+
+    public static ArrayList<String> SplitOperations(String line) {
+        ArrayList<String> operations = new ArrayList<>();
+        StringBuilder currentOperation = new StringBuilder();
+        char prevChar = 0;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (Contains(c) || Character.isDigit(c)) {
+                if (prevChar == 'W') {
+                    currentOperation.append(c);
+                }
+                else if ((c == 'Y' || c == 'X' || c == 'W' || c == 'U' || c == 'D') && !currentOperation.isEmpty() && prevChar != 'W') {
+                    operations.add(currentOperation.toString());
+                    currentOperation = new StringBuilder();
+                    currentOperation.append(c);
+                }
+                else {
+                    currentOperation.append(c);
+                }
+            }
+            prevChar = c;
+        }
+
+        if (!currentOperation.isEmpty()) {
+            operations.add(currentOperation.toString());
+        }
+
+        return operations;
+    }
+
+    public static int CheckSymbols(ArrayList<String> symbols, boolean checkEndAndBegginning){
+        if(checkEndAndBegginning){
+            if(!symbols.get(0).equals("Yн")){
+                return 0;
+            }
+            else if(!symbols.get(symbols.size() - 1).equals("Yк")){
+                return symbols.size() - 1;
+            }
+        }
+
+        ArrayList<Integer> upperArrows = new ArrayList<>();
+        ArrayList<Integer> lowerArrows = new ArrayList<>();
+
+        for(int i = 0; i < symbols.size(); i++){
+            var currentSymbol = symbols.get(i);
+            if(currentSymbol.length() < 2) return i;
+
+            char firstChar = currentSymbol.charAt(0);
+            char secondChar = currentSymbol.charAt(1);
+
+            switch (firstChar){
+                case 'Y':
+                    if((i == 0 || i == symbols.size() - 1) && checkEndAndBegginning){
+                        if(secondChar != 'н' && secondChar != 'к')
+                            return i;
+                    }
+                    else {
+                        if(!Character.isDigit(secondChar))
+                            return i;
+                    }
+                    break;
+                case 'X':
+                    if(!Character.isDigit(secondChar))
+                        return i;
+                    break;
+                case 'D', 'U':
+                    if(!Character.isDigit(secondChar))
+                        return i;
+                    else{
+                        int index = Character.getNumericValue(secondChar);
+                        if(firstChar == 'D' && !lowerArrows.contains(index))
+                            lowerArrows.add(index);
+                        else if(firstChar == 'U' && !upperArrows.contains(index))
+                            upperArrows.add(index);
+                    }
+
+                    break;
+                case 'W':
+                    if(currentSymbol.length() < 3)
+                        return i;
+
+                    if(secondChar != 'U' || !Character.isDigit(currentSymbol.charAt(2)))
+                        return i;
+                    break;
+                default:
+                    return i;
+            }
+        }
+
+        if(CheckMatchingArrows(upperArrows, lowerArrows))
+            return -1;
+        else
+            return Integer.MAX_VALUE;
+    }
+
+    private static boolean CheckMatchingArrows(ArrayList<Integer> upperArrows, ArrayList<Integer> lowerArrows){
+        return lowerArrows.containsAll(upperArrows);
+    }
+
+    public static int CheckChars(String line){
+        char[] charArray = line.toCharArray();
+        for(int i = 0; i < charArray.length; i++){
+            if(!Contains(charArray[i]) && !Character.isDigit(charArray[i]))
+                return i;
+        }
+
+        return -1;
+    }
+
+    public static ArrayList<Integer> GetAllConditionsIndexes(ArrayList<String> symbols){
+        ArrayList<Integer> allIndexes = new ArrayList<>();
+        var objects = ConvertToSchemeComponents(symbols);
+        for(int i = 0; i < objects.size(); i++){
+            var currentObj = objects.get(i);
+            if(currentObj.type.equals("condition"))
+                allIndexes.add(currentObj.index);
+        }
+        return allIndexes;
+    }
+
+    public static ArrayList<SchemeComponent> ConvertToSchemeComponents(ArrayList<String> symbols){
+        ArrayList<SchemeComponent> schemeComponents = new ArrayList<SchemeComponent>();
+        for (int i = 0; i < symbols.size(); i++) {
+            String currentSymbol = symbols.get(i);
+            if (currentSymbol.charAt(0) == 'X') {
+                schemeComponents.add(new Condition(Integer.parseInt((currentSymbol.substring(1))),
+                        Integer.parseInt(symbols.get(i+1).substring(1))));
+            }
+            else if (currentSymbol.charAt(0) == 'Y') {
+                if (currentSymbol.length() == 1 || currentSymbol.equals("Yн")  || currentSymbol.equals("Yn")){
+                    continue;
+                }
+                else if (currentSymbol.charAt(1) == 'k' || currentSymbol.charAt(1) == 'к'){
+                    schemeComponents.add(new Command(-1));
+                }
+                else {
+                    schemeComponents.add(new Command(Integer.parseInt(currentSymbol.substring(1))));
+                }
+            }
+            else if (currentSymbol.charAt(0) == 'D') {
+                schemeComponents.add(new ArrowDown(Integer.parseInt(currentSymbol.substring(1))));
+            }
+            else if (currentSymbol.charAt(0) == 'W'){
+                schemeComponents.add(new Unconditional(Integer.parseInt(currentSymbol.substring(2))));
+            }
+        }
+        return schemeComponents;
+    }
+
+    public static List<List<Boolean>> GetAllCombinations(ArrayList<Integer> allIndexes) {
+        List<List<Boolean>> combinations = new ArrayList<>();
+        ArrayList<Boolean> currentCombination = new ArrayList<>(allIndexes.size());
+        for (int i = 0; i < allIndexes.size(); i++) {
+            currentCombination.add(false);
+        }
+        GenerateCombinations(allIndexes, currentCombination, 0, combinations);
+        return combinations;
+    }
+
+    private static void GenerateCombinations(ArrayList<Integer> allIndexes, ArrayList<Boolean> currentCombination, int currentIndex, List<List<Boolean>> combinations) {
+        if (currentIndex == allIndexes.size()) {
+            combinations.add(new ArrayList<>(currentCombination));
+            return;
+        }
+
+        currentCombination.set(currentIndex, false);
+        GenerateCombinations(allIndexes, currentCombination, currentIndex + 1, combinations);
+
+        currentCombination.set(currentIndex, true);
+        GenerateCombinations(allIndexes, currentCombination, currentIndex + 1, combinations);
+    }
+
+    public static ArrayList<Integer> GetNumbersFromString(String input){
+        ArrayList<Integer> numbers = new ArrayList<>();
+
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(input);
+
+        while (matcher.find()) {
+            int number = Integer.parseInt(matcher.group());
+            numbers.add(number);
+        }
+        return numbers;
+    }
+
+    private static String ReadFileAsString(String filePath) throws IOException {
+        StringBuffer fileData = new StringBuffer();
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+
+        char[] buf = new char[1024];
+        int numRead=0;
+        while((numRead=reader.read(buf)) != -1){
+            String readData = String.valueOf(buf, 0, numRead);
+            fileData.append(readData);
+        }
+        reader.close();
+        return fileData.toString();
+    }
+
+    public static String CheckSchemeFromFile(String file){
+        try {
+            String line = ReadFileAsString(file);
+            System.out.println("Получена строка:");
+            System.out.println(line);
+            int errorIndex = ParsingHelper.CheckChars(line);
+
+            if (errorIndex == -1) {
+                var symbols = ParsingHelper.SplitOperations(line);
+                //PrintSymbols(symbols);
+                int symbolErrorIndex = ParsingHelper.CheckSymbols(symbols, true);
+
+                if (symbolErrorIndex == -1)
+                    System.out.println("Строка правильная!");
+                else if(symbolErrorIndex == Integer.MAX_VALUE)
+                    System.out.println("Несоответствие стрелок!");
+                else
+                    OutputHelper.PrintSymbolError(line, symbols, symbolErrorIndex);
+            }
+            else {
+                OutputHelper.PrintCharError(line, errorIndex, "Введён некорректный символ №" + errorIndex);
+            }
+
+            return line;
+        }
+        catch (IOException e) {
+            System.out.println("Ошибка при чтении файла");
+        }
+
+        return null;
+    }
+
+    private static boolean Contains(char c) {
+        for (char allowedChar : whitelistChars) {
+            if (c == allowedChar) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
