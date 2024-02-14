@@ -162,7 +162,16 @@ public class Main
                 if(allCombinations.get(i).get(j))
                     trueIndexes.add(allIndexes.get(j));
             }
-            System.out.println("Запуск алгоритма с истинными условиями: " + "X" + String.join("X", trueIndexes.stream().map(Object::toString).toArray(String[]::new)));
+            StringBuilder str = new StringBuilder();
+            if(!trueIndexes.isEmpty()){
+                for(int j = 0; j < trueIndexes.size(); j++){
+                    str.append("X");
+                    str.append(trueIndexes.get(j));
+                }
+            }
+            else str.append("нет условий");
+
+            System.out.println("Запуск алгоритма с истинными условиями: " + str);
             RunSecondMode(symbols, trueIndexes);
             System.out.println("Переход к следующей вариации...");
             System.out.println("==============================================================");
