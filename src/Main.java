@@ -8,7 +8,7 @@ public class Main
     public static void main(String[] args) {
         //String[] studentsFilePaths = {"Efremov.txt", "Kuznetsov.txt", "Vavilov.txt", "Agafonov.txt", "Rogov.txt"};
         String algorithmPath = "Robot.txt";
-        String mapPath = "Map.txt";
+        String mapPath = "Maps/spiral.txt";
 
         String line = ParsingHelper.CheckSchemeFromFile(algorithmPath);
         if(line != null){
@@ -198,6 +198,8 @@ public class Main
             Map map = new Map(cells);
             var schemeComponents = ParsingHelper.ConvertToSchemeComponents(symbols);
             var entranceCell = map.getEntranceCell();
+            //TODO: ОБЯЗАТЕЛЬНО, сделать определение текущего направления взгляда робота, в зависимости от того, где пустая клетка
+            //(при неправильном направлении вылетает Exception)
             Robot robot = new Robot(Directions.NORTH, entranceCell.row, entranceCell.column, schemeComponents, map);
             map.drawFrame();
             robot.run();

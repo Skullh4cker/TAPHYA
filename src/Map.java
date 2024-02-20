@@ -14,6 +14,7 @@ public class Map {
     }
 
     public Cell getCell(int row, int column){
+        //TODO: Сюда добавить проверку на выход за пределы карты
         return cells[row][column];
     }
     public CellTypes getCellType(int row, int column){
