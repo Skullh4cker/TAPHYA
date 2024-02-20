@@ -1,4 +1,4 @@
-class Condition extends SchemeComponent {
+public class Condition extends SchemeComponent {
     boolean isFulfilled;
     public int arrowIndex;
 

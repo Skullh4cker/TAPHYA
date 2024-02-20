@@ -1,15 +1,16 @@
+import java.io.IOException;
 import java.util.*;
 
 public class Main
 {
-    //TODO: Хорошенько отдохнуть :)
     private static boolean detailedOutput = false;
 
     public static void main(String[] args) {
-        String[] studentsFilePaths = {"Efremov.txt", "Kuznetsov.txt", "Vavilov.txt", "Agafonov.txt", "Rogov.txt"};
-        String filePath = studentsFilePaths[2];
-        String line = ParsingHelper.CheckSchemeFromFile(filePath);
+        //String[] studentsFilePaths = {"Efremov.txt", "Kuznetsov.txt", "Vavilov.txt", "Agafonov.txt", "Rogov.txt"};
+        String algorithmPath = "Robot.txt";
+        String mapPath = "Map.txt";
 
+        String line = ParsingHelper.CheckSchemeFromFile(algorithmPath);
         if(line != null){
             int mode = OutputHelper.ChooseModeSafe();
             var symbols = ParsingHelper.SplitOperations(line);
@@ -23,6 +24,18 @@ public class Main
                     break;
                 case 3:
                     RunThirdMode(symbols);
+                    break;
+                case 4:
+                    try{
+                        var charMap = ParsingHelper.ParseMapFromFile(mapPath);
+                        RunRobotMode(symbols, charMap);
+                    }
+                    catch (IOException ex){
+                        System.err.println("Ошибка при чтении файла!");
+                    }
+                    catch (InvalidMapException ex){
+                        System.err.println(ex.getMessage());
+                    }
                     break;
             }
         }
@@ -175,6 +188,19 @@ public class Main
             RunSecondMode(symbols, trueIndexes);
             System.out.println("Переход к следующей вариации...");
             System.out.println("==============================================================");
+        }
+    }
+
+    private static void RunRobotMode(ArrayList<String> symbols, char[][] charMap){
+        var cells = ParsingHelper.ConvertToCells(charMap);
+
+        if(cells.length > 0){
+            Map map = new Map(cells);
+            var schemeComponents = ParsingHelper.ConvertToSchemeComponents(symbols);
+            var entranceCell = map.getEntranceCell();
+            Robot robot = new Robot(Directions.NORTH, entranceCell.row, entranceCell.column, schemeComponents, map);
+            map.drawFrame();
+            robot.run();
         }
     }
 }

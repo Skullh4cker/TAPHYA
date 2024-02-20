@@ -58,9 +58,9 @@ public class OutputHelper {
         int mode = 0;
         while(true){
             try {
-                System.out.print("Выберите режим работы (1 - пошаговый, 2 - с вводом всех условий, 3 - перебор вариаций): ");
+                System.out.print("Выберите режим работы (1 - пошаговый, 2 - с вводом всех условий, 3 - перебор вариаций, 4 - режим робота): ");
                 mode = scanner.nextInt();
-                if(mode >= 1 && mode <= 3){
+                if(mode >= 1 && mode <= 4){
                     System.out.println("Вы успешно выбрали режим " + mode + "!");
                     break;
                 }
