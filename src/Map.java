@@ -14,12 +14,18 @@ public class Map {
     }
 
     public Cell getCell(int row, int column){
-        return cells[row][column];
-    }
-    public CellTypes getCellType(int row, int column){
         if(row < cells.length && column < cells[0].length)
-            return getCell(row, column).getType();
-        else return CellTypes.WALL;
+            return cells[row][column];
+        else
+            return null;
+    }
+
+    public CellTypes getCellType(int row, int column){
+        Cell cell = getCell(row, column);
+        if(cell != null)
+            return cell.getType();
+        else 
+            return CellTypes.WALL;
     }
     public void drawFrame(Robot robot){
         for(int row = 0; row < cells.length; row++){

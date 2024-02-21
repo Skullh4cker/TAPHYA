@@ -124,7 +124,7 @@ public class ParsingHelper {
         var objects = ConvertToSchemeComponents(symbols);
         for(int i = 0; i < objects.size(); i++){
             var currentObj = objects.get(i);
-            if(currentObj.type.equals("condition"))
+            if(currentObj instanceof Condition)
                 allIndexes.add(currentObj.index);
         }
         return allIndexes;

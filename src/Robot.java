@@ -67,13 +67,22 @@ public class Robot {
 
     public void move(){
         map.getCell(row, column).setHasRobot(false);
+        int rowMemory = row;
+        int columnMemory = column;
+        
         switch (direction) {
             case NORTH -> row--;
             case EAST -> column++;
             case SOUTH -> row++;
             case WEST -> column--;
         }
-        map.getCell(row, column).setHasRobot(true);
+        Cell newCell = map.getCell(row, column);
+        if(newCell != null)
+            newCell.setHasRobot(true);
+        else{
+            row = rowMemory;
+            column = columnMemory;
+        }
     }
 
     public boolean isWallRight(){
@@ -124,8 +133,7 @@ public class Robot {
 
             currentObj = objects.get(step);
 
-            if (currentObj.type.equals("command")) {
-                Command command = (Command) currentObj;
+            if (currentObj instanceof Command command) {
                 switch (command.index) {
                     case 1 -> turnRight();
                     case 2 -> turnLeft();
@@ -137,8 +145,7 @@ public class Robot {
                 step++;
                 continue;
             }
-            else if (currentObj.type.equals("condition")) {
-                Condition condition = (Condition) currentObj;
+            else if (currentObj instanceof Condition condition) {
                 switch (condition.index){
                     case 0 -> condition.setCondition(!isExitRight());
                     case 1 -> condition.setCondition(isWallRight());
@@ -151,7 +158,7 @@ public class Robot {
                 }
                 else {
                     for (int i = 0; i < objects.size(); i++) {
-                        if ((objects.get(i).type.equals("arrow")) && (objects.get(i).index == condition.arrowIndex)) {
+                        if (objects.get(i) instanceof ArrowDown && objects.get(i).index == condition.arrowIndex) {
                             step = i;
                             break;
                         }
@@ -159,9 +166,9 @@ public class Robot {
                     continue;
                 }
             }
-            else if (currentObj.type.equals("unconditional")) {
+            else if (currentObj instanceof Unconditional) {
                 for (int i = 0; i < objects.size(); i++) {
-                    if (objects.get(i).type.equals("arrow") && objects.get(i).index == currentObj.index) {
+                    if (objects.get(i) instanceof ArrowDown && objects.get(i).index == currentObj.index) {
                         step = i;
                         break;
                     }

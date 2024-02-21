@@ -1,7 +1,6 @@
 class Command extends SchemeComponent {
     public Command(int index){
         this.index = index;
-        type = "command";
     }
 
     void printInfo(){

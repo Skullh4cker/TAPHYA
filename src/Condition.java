@@ -5,14 +5,12 @@ public class Condition extends SchemeComponent {
     public Condition(int index, int arrowIndex){
         this.index = index;
         this.arrowIndex = arrowIndex;
-        type = "condition";
         isFulfilled = false;
     }
 
     public Condition(boolean isFulfilled, int arrowIndex) {
         this.isFulfilled = isFulfilled;
         this.arrowIndex = arrowIndex;
-        type = "condition";
         isFulfilled = false;
     }
 

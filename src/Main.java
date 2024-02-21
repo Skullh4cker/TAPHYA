@@ -6,8 +6,9 @@ public class Main
     private static boolean detailedOutput = false;
 
     public static void main(String[] args) {
-        //String[] studentsFilePaths = {"Efremov.txt", "Kuznetsov.txt", "Vavilov.txt", "Agafonov.txt", "Rogov.txt"};
+        String[] studentsFilePaths = {"Efremov.txt", "Kuznetsov.txt", "Vavilov.txt", "Agafonov.txt", "Rogov.txt"};
         String algorithmPath = "Robot.txt";
+        //String algorithmPath = studentsFilePaths[0];
         String mapPath = "Maps/spiral.txt";
 
         String line = ParsingHelper.CheckSchemeFromFile(algorithmPath);
@@ -54,14 +55,12 @@ public class Main
         while (currentObj.index != -1) {
             currentObj = objects.get(step);
 
-            if (currentObj.type.equals("command")) {
-                Command command = (Command) currentObj;
+            if (currentObj instanceof Command command) {
                 command.printInfo();
                 step++;
                 continue;
             }
-            else if (currentObj.type.equals("condition")) {
-                Condition condition = (Condition) currentObj;
+            else if (currentObj instanceof Condition condition ) {
                 if(detailedOutput)
                     condition.printInfo();
 
@@ -72,7 +71,7 @@ public class Main
                 }
                 else {
                     for (int i = 0; i < objects.size(); i++) {
-                        if ((objects.get(i).type.equals("arrow")) && (objects.get(i).index == condition.arrowIndex)) {
+                        if (objects.get(i) instanceof ArrowDown && (objects.get(i).index == condition.arrowIndex)) {
                             step = i;
                             break;
                         }
@@ -80,9 +79,9 @@ public class Main
                     continue;
                 }
             }
-            else if (currentObj.type.equals("unconditional")) {
+            else if (currentObj instanceof Unconditional) {
                 for (int i = 0; i < objects.size(); i++) {
-                    if (objects.get(i).type.equals("arrow") && objects.get(i).index == currentObj.index) {
+                    if (objects.get(i) instanceof ArrowDown && objects.get(i).index == currentObj.index) {
                         step = i;
                         break;
                     }
@@ -98,10 +97,10 @@ public class Main
 
         for (int i = 0; i < objects.size(); i++){
             var currentObj = objects.get(i);
-            if(currentObj.type.equals("condition")){
+            if(currentObj instanceof Condition condition){
                 for (int j = 0; j < trueIndexes.size(); j++){
                     if(currentObj.index == trueIndexes.get(j)){
-                        ((Condition) currentObj).setCondition(true);
+                        condition.setCondition(true);
                         break;
                     }
                 }
@@ -116,20 +115,19 @@ public class Main
         while (currentObj.index != -1) {
             currentObj = objects.get(step);
 
-            if (currentObj.type.equals("command")) {
-                ((Command) currentObj).printInfo();
+            if (currentObj instanceof Command command) {
+                command.printInfo();
                 step++;
                 continue;
             }
-            else if (currentObj.type.equals("condition")) {
-                Condition condition = (Condition) currentObj;
+            else if (currentObj instanceof Condition condition) {
                 if (condition.isFulfilled) {
                     step++;
                     continue;
                 }
                 else {
                     for (int i = 0; i < objects.size(); i++) {
-                        if ((objects.get(i).type.equals("arrow")) && (objects.get(i).index == condition.arrowIndex)) {
+                        if (objects.get(i) instanceof ArrowDown && (objects.get(i).index == condition.arrowIndex)) {
                             for (int k = 0; k < tags.size(); k++){
                                 if(tags.get(k) == condition.arrowIndex){
                                     System.out.println("Далее алгоритм зацикливается!");
@@ -144,9 +142,9 @@ public class Main
                     continue;
                 }
             }
-            else if (currentObj.type.equals("unconditional")) {
+            else if (currentObj instanceof Unconditional) {
                 for (int i = 0; i < objects.size(); i++) {
-                    if (objects.get(i).type.equals("arrow") && objects.get(i).index == currentObj.index) {
+                    if (objects.get(i) instanceof ArrowDown && objects.get(i).index == currentObj.index) {
                         for (int k = 0; k < tags.size(); k++){
                             if(tags.get(k) == currentObj.index){
                                 System.out.println("Далее алгоритм зацикливается!");
