@@ -212,7 +212,7 @@ public class ParsingHelper {
     public static String CheckSchemeFromFile(String file){
         try {
             String line = ReadFileAsString(file);
-            System.out.println("Получена строка:");
+            System.out.println("Получена ЛСА:");
             System.out.println(line);
             if(!line.isEmpty()){
                 int errorIndex = ParsingHelper.CheckChars(line);
@@ -223,7 +223,7 @@ public class ParsingHelper {
                     int symbolErrorIndex = ParsingHelper.CheckSymbols(symbols, true);
 
                     if (symbolErrorIndex == -1)
-                        System.out.println("Строка правильная!");
+                        System.out.println("ЛСА правильная!");
                     else if(symbolErrorIndex == Integer.MAX_VALUE)
                         System.out.println("Несоответствие стрелок!");
                     else
@@ -235,6 +235,8 @@ public class ParsingHelper {
 
                 return line;
             }
+            else
+                System.out.println("Строка была пустой...");
         }
         catch (IOException e) {
             System.out.println("Ошибка при чтении файла");
@@ -242,66 +244,27 @@ public class ParsingHelper {
 
         return null;
     }
-    /*
-    private static boolean Contains(char c) {
-        for (char allowedChar : whitelistSymbolChars) {
-            if (c == allowedChar) {
-                return true;
-            }
-        }
-        return false;
-    }
-*/
-    //Может стоит ввести масcив разрешённых чаров для карты? Да я так и хотел
-    //Ну чё, давай пиши :) ща всё буит
-    //Гениальный кодинг конечно
-    //дыа
-    //общение через комментарии - топ　凄いですね
-    //Чексимволс надо для мапы писать?
-    //По идее нет, там таких сложных проверок не должно быть. Просто чек на аномальные символы можно тут сделать
-    //Вообще сейчас можно условно раскидать по классам прямо в этом же цикле for
-    //Можно, да, но классов у нас нет. Да и эта функция возвращает же по идее просто список char
-    //А, бля, я сейчас понял, что нам же нужен тут двумерный массив, иначе карта потеряется. Бля, тогда список списков делать или как?
-    //А, та хочешь на две функции разделить, понял
-    //Ну наверное список списков,
-    //А может тупо список строк? А перед возвратом, когда размер известен, преобразовать в массив двумерный
-    //А у нас не будет проблемы с тем, что карта же не обязательно прямоугольная
-    //Короче я придумал, можно просто пустыми клетками заполнять, а размерность массива по самой большой строке/столбцу выбирать
-    //А как потом такое кастить? Как он поймёт, где бесмыссленные клетки, а где со смыслом. Можно числами
-    //Ну просто, где у нас символов не хватает, туда добавлять
 
     private static String[] CleanInputMap(String[] lines){
         var cleanLines = new ArrayList<String>();
-        int exitCounter=0, enterCounter = 0;
+
         for(var line : lines){
             StringBuilder newLine = new StringBuilder();
             for(Character ch : line.toCharArray()){
-                if(whitelistMapChars.contains(ch)){
+                if(whitelistMapChars.contains(ch))
                     newLine.append(ch);
-                    //if (ch == 'E') enterCounter++;
-                    //if (ch == 'X') exitCounter++;
-                    //System.out.print("\"" + ch + "\" ");
-                }
+
                 else if(ch == ' ')
                     newLine.append('#');
                 else if(ch != '\n' && ch != '\r')
                     return null;
             }
             cleanLines.add(newLine.toString());
-            //System.out.println(newLine);
         }
-        /*
-        if (enterCounter > 1 || exitCounter > 1 || enterCounter == 0 || exitCounter == 0 )
-        {
-            System.out.println("Неправильное количество входов и выходов!");
-        }*/
         return cleanLines.toArray(new String[0]);
     }
+
     public static char[][] ParseMapFromFile(String filepath) throws InvalidMapException, IOException{
-        //ПРОИЗОШЁЛ РЕФАКТОРИНГ
-        //АВТОР - GPT
-        //Мне тож кажется так получше смотрится
-        //Я орнул почему-то с этого
         String allLines = ReadFileAsString(filepath);
         if(allLines.isEmpty())
             throw new InvalidMapException("Строка в файле была пустой!");
@@ -317,9 +280,9 @@ public class ParsingHelper {
         if(!CheckWalls(mapArray))
             throw new InvalidMapException("Неверное расположение стен (область не замкнута)!");
 
-        //PrintCharArray(mapArray);
         return mapArray;
     }
+
     public static Cell[][] ConvertToCells(char[][] charMap){
         Cell[][] cells = new Cell[charMap.length][charMap[0].length];
         for(int row = 0; row < charMap.length; row++){
@@ -344,6 +307,7 @@ public class ParsingHelper {
         }
         return cells;
     }
+
     private static boolean CheckEntryExit(char[][] mapArray){
         int entryCounter = 0;
         int exitCounter = 0;
@@ -357,78 +321,7 @@ public class ParsingHelper {
         }
         return entryCounter == 1 && exitCounter == 1;
     }
-    /*
-    // Function to check if a given cell can be included in DFS
-    public static boolean isSafe(char[][] grid, boolean[][] visited, int row, int col) {
-        return !(row < 0 || row >= grid.length || col < 0 || col >= grid[0].length || grid[row][col] == '#' || visited[row][col]);
-    }
 
-    // BFS method to explore any '.' from boundary
-    public static void DFS(char[][] grid, boolean[][] visited, int row, int col) {
-        visited[row][col] = true;
-
-        int[] dr = {-1, 0, 1, 0};  // Directions for row-wise DFS traversal
-        int[] dc = {0, 1, 0, -1};  // Directions for column-wise DFS traversal
-
-        for (int i = 0; i < 4; i++)
-            if (isSafe(grid, visited, row + dr[i], col + dc[i]))
-                DFS(grid, visited, row + dr[i], col + dc[i]);
-    }
-
-    // Function to check if area is closed
-    public static boolean isClosed(char[][] grid) {
-        int rows = grid.length;
-        int cols = grid[0].length;
-
-        boolean[][] visited = new boolean[rows][cols];
-
-        // Exploring boundary cells
-        for (int i = 0; i < rows; i++) {
-            if (grid[i][0] == '.' && !visited[i][0])
-                DFS(grid, visited, i, 0);
-
-            if (grid[i][cols - 1] == '.' && !visited[i][cols - 1])
-                DFS(grid, visited, i, cols - 1);
-        }
-
-        for (int i = 0; i < cols; i++) {
-            if (grid[0][i] == '.' && !visited[0][i])
-                DFS(grid, visited, 0, i);
-
-            if (grid[rows - 1][i] == '.' && !visited[rows - 1][i])
-                DFS(grid, visited, rows - 1, i);
-        }
-
-        // Checking if any left '.' is not visited yet
-        for (int i = 0; i < rows; i++)
-            for (int j = 0; j < cols; j++)
-                if (grid[i][j] == '.' && !visited[i][j])
-                    return true;
-
-        return false;
-    }
-
-    static boolean dfs(char[][] maze, boolean[][] visited, int row, int col) {
-        int rows = maze.length;
-        int cols = maze[0].length;
-
-        if (row < 0 || row >= rows || col < 0 || col >= cols) {
-            return false;
-        }
-
-        if (maze[row][col] == '#' || visited[row][col]) {
-            return true;
-        }
-
-        visited[row][col] = true;
-
-
-        return dfs(maze, visited, row + 1, col)
-                && dfs(maze, visited, row - 1, col)
-                && dfs(maze, visited, row, col + 1)
-                && dfs(maze, visited, row, col - 1);
-    }
-     */
     private static boolean CheckWalls(char[][] grid){
         if (grid == null || grid.length == 0 || grid[0].length == 0) {
             return false;
@@ -466,13 +359,5 @@ public class ParsingHelper {
             }
         }
         return mapArray;
-    }
-    private static void PrintCharArray(char[][] array){
-        for(int i = 0; i < array.length; i++){
-            for(int j = 0; j < array[i].length; j++){
-                System.out.print("\"" + array[i][j] + "\" ");
-            }
-            System.out.println(" ");
-        }
     }
 }

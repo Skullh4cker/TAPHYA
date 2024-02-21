@@ -22,8 +22,10 @@ public class Robot {
         return direction;
     }
 
-    public void setDirection(Directions direction) {
+    public void setDirection(Directions direction)
+    {
         this.direction = direction;
+        updateForm();
     }
 
     public int getColumn() {
@@ -42,34 +44,29 @@ public class Robot {
         this.objects = objects;
     }
 
-    public void changeDirection(Directions newDirection){
-        direction = newDirection;
-        updateForm();
-    }
-
     public void turnLeft(){
         switch (direction){
-            case NORTH -> changeDirection(Directions.WEST);
-            case EAST -> changeDirection(Directions.NORTH);
-            case SOUTH -> changeDirection(Directions.EAST);
-            case WEST -> changeDirection(Directions.SOUTH);
+            case NORTH -> setDirection(Directions.WEST);
+            case EAST -> setDirection(Directions.NORTH);
+            case SOUTH -> setDirection(Directions.EAST);
+            case WEST -> setDirection(Directions.SOUTH);
         }
     }
 
     public void turnRight(){
         switch (direction){
-            case NORTH -> changeDirection(Directions.EAST);
-            case EAST -> changeDirection(Directions.SOUTH);
-            case SOUTH -> changeDirection(Directions.WEST);
-            case WEST -> changeDirection(Directions.NORTH);
+            case NORTH -> setDirection(Directions.EAST);
+            case EAST -> setDirection(Directions.SOUTH);
+            case SOUTH -> setDirection(Directions.WEST);
+            case WEST -> setDirection(Directions.NORTH);
         }
     }
 
     public void move(){
-        map.getCell(row, column).setHasRobot(false);
+        var oldCell = map.getCell(row, column);
         int rowMemory = row;
         int columnMemory = column;
-        
+
         switch (direction) {
             case NORTH -> row--;
             case EAST -> column++;
@@ -77,8 +74,10 @@ public class Robot {
             case WEST -> column--;
         }
         Cell newCell = map.getCell(row, column);
-        if(newCell != null)
-            newCell.setHasRobot(true);
+        if(newCell != null && newCell.getType() != CellTypes.WALL){
+            oldCell.hasRobot = false;
+            newCell.hasRobot = true;
+        }
         else{
             row = rowMemory;
             column = columnMemory;
@@ -127,9 +126,15 @@ public class Robot {
     }
 
     public void run(){
+        map.drawFrame(this);
         int step = 0;
         SchemeComponent currentObj = objects.get(step);
         while (currentObj.index != -1) {
+            if (map.getCellType(row, column) == CellTypes.EXIT){
+                System.out.println("=".repeat(map.getCells()[0].length * 2));
+                System.out.println("Выход найден!");
+                break;
+            }
 
             currentObj = objects.get(step);
 
@@ -137,11 +142,9 @@ public class Robot {
                 switch (command.index) {
                     case 1 -> turnRight();
                     case 2 -> turnLeft();
-                    case 3 -> {
-                        move();
-                        map.drawFrame(this);
-                    }
+                    case 3 -> move();
                 }
+                map.drawFrame(this);
                 step++;
                 continue;
             }
@@ -174,10 +177,7 @@ public class Robot {
                     }
                 }
             }
-            if (map.getCellType(row, column) == CellTypes.EXIT){
-                System.out.println("Выход найден!");
-                break;
-            }
+
             step++;
         }
     }

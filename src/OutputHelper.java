@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -75,24 +76,52 @@ public class OutputHelper {
         return mode;
     }
 
-    public static int ChooseConditionSafe(String defaultMessage){
+    public static int ChooseIntValueSafe(String defaultMessage, int upperBound){
         Scanner scanner = new Scanner(System.in);
-        int condition = 0;
+        int value = 0;
         while(true){
             try {
                 System.out.print(defaultMessage);
-                condition = scanner.nextInt();
-                if(condition >= 0 && condition <= 1)
+                value = scanner.nextInt();
+                if(value >= 0 && value <= upperBound)
                     break;
 
                 else
-                    System.out.println("Условие " + condition + " неверно...");
+                    System.out.println("Значение " + value + " неверно...");
             }
             catch (InputMismatchException e) {
                 System.out.println("Ошибка! Пожалуйста, введите целое число.");
                 scanner.nextLine();
             }
         }
-        return condition;
+        return value;
+    }
+
+    public static String ChooseFilePathSafe(String directory, String errorMessage) throws InvalidMapException {
+        String chosenPath = "";
+        var textFiles = GetAllFiles(directory);
+
+        if (textFiles == null)
+            throw new InvalidMapException("Ошибка получения файлов! Вероятно, директория \"" + directory + "\" не найдена");
+        if (textFiles.length == 0)
+            throw new InvalidMapException(errorMessage);
+
+        for (int i = 0; i < textFiles.length; i++) {
+            System.out.println(i + ") " + textFiles[i].getName());
+        }
+
+        int chosenIndex = ChooseIntValueSafe("Пожалуйста, выберите файл по индексу: ", textFiles.length - 1);
+        chosenPath = textFiles[chosenIndex].getAbsolutePath();
+
+        return chosenPath;
+    }
+
+    private static File[] GetAllFiles(String mapsDirectory){
+        File folder = new File(mapsDirectory);
+
+        if (folder.exists() && folder.isDirectory())
+            return folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".txt"));
+
+        return null;
     }
 }

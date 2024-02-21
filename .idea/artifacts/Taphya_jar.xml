@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Taphya:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Taphya_jar</output-path>
+    <root id="archive" name="Taphya.jar">
+      <element id="module-output" name="Taphya" />
+    </root>
+  </artifact>
+</component>

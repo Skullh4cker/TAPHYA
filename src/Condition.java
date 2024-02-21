@@ -19,7 +19,7 @@ public class Condition extends SchemeComponent {
     }
 
     public void setCondition(){
-        int b = OutputHelper.ChooseConditionSafe("Введите условие X" + index + ": ");
+        int b = OutputHelper.ChooseIntValueSafe("Введите условие X" + index + ": ", 1);
         isFulfilled = b == 1;
     }
 

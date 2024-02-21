@@ -1,7 +1,7 @@
 public class Cell {
-    public int column;
-    public int row;
-    public CellTypes type;
+    private int column;
+    private int row;
+    private CellTypes type;
     public boolean hasRobot;
 
     public Cell(int row, int column, CellTypes type, boolean hasRobot) {
@@ -37,9 +37,5 @@ public class Cell {
 
     public boolean isHasRobot() {
         return hasRobot;
-    }
-
-    public void setHasRobot(boolean hasRobot) {
-        this.hasRobot = hasRobot;
     }
 }

@@ -3,20 +3,29 @@ import java.util.*;
 
 public class Main
 {
-    private static boolean detailedOutput = false;
+    private static final String lsaDirectory = "LSA";
+    private static final String mapsDirectory = "Maps";
+    private static final boolean detailedOutput = false;
+    private static final int mapUpdateDelay = 250;
 
     public static void main(String[] args) {
-        String[] studentsFilePaths = {"Efremov.txt", "Kuznetsov.txt", "Vavilov.txt", "Agafonov.txt", "Rogov.txt"};
-        String algorithmPath = "Robot.txt";
-        //String algorithmPath = studentsFilePaths[0];
-        String mapPath = "Maps/spiral.txt";
+        String lsaPath = "";
 
-        String line = ParsingHelper.CheckSchemeFromFile(algorithmPath);
-        if(line != null){
+        try{
+            lsaPath = OutputHelper.ChooseFilePathSafe(lsaDirectory, "Файлы ЛСА не найдены в директории!");
+        }
+        catch (InvalidMapException ex) {
+            System.err.println(ex.getMessage());
+            return;
+        }
+
+        String line = ParsingHelper.CheckSchemeFromFile(lsaPath);
+
+        if(line != null) {
             int mode = OutputHelper.ChooseModeSafe();
             var symbols = ParsingHelper.SplitOperations(line);
 
-            switch (mode){
+            switch (mode) {
                 case 1:
                     RunFirstMode(symbols);
                     break;
@@ -27,14 +36,15 @@ public class Main
                     RunThirdMode(symbols);
                     break;
                 case 4:
-                    try{
+                    try {
+                        var mapPath = OutputHelper.ChooseFilePathSafe(mapsDirectory, "Файлы карт не найдены в директории!");
                         var charMap = ParsingHelper.ParseMapFromFile(mapPath);
                         RunRobotMode(symbols, charMap);
                     }
-                    catch (IOException ex){
+                    catch (IOException ex) {
                         System.err.println("Ошибка при чтении файла!");
                     }
-                    catch (InvalidMapException ex){
+                    catch (InvalidMapException ex) {
                         System.err.println(ex.getMessage());
                     }
                     break;
@@ -193,11 +203,10 @@ public class Main
         var cells = ParsingHelper.ConvertToCells(charMap);
 
         if(cells.length > 0){
-            Map map = new Map(cells);
+            Map map = new Map(cells, mapUpdateDelay);
             var schemeComponents = ParsingHelper.ConvertToSchemeComponents(symbols);
             var entranceCell = map.getEntranceCell();
-            Robot robot = new Robot(Directions.NORTH, entranceCell.row, entranceCell.column, schemeComponents, map);
-            map.drawFrame(robot);
+            Robot robot = new Robot(Directions.NORTH, entranceCell.getRow(), entranceCell.getColumn(), schemeComponents, map);
             robot.run();
         }
     }
