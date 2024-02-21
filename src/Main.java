@@ -198,10 +198,8 @@ public class Main
             Map map = new Map(cells);
             var schemeComponents = ParsingHelper.ConvertToSchemeComponents(symbols);
             var entranceCell = map.getEntranceCell();
-            //TODO: ОБЯЗАТЕЛЬНО, сделать определение текущего направления взгляда робота, в зависимости от того, где пустая клетка
-            //(при неправильном направлении вылетает Exception)
             Robot robot = new Robot(Directions.NORTH, entranceCell.row, entranceCell.column, schemeComponents, map);
-            map.drawFrame();
+            map.drawFrame(robot);
             robot.run();
         }
     }

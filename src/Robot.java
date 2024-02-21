@@ -1,12 +1,12 @@
 import java.util.ArrayList;
 
 public class Robot {
-    public Directions direction; //другой вариант названия: napravlenie
-                                    // North, East, South, West
-    public int column;
-    public int row;
-    public ArrayList<SchemeComponent> objects;
-    public Map map;
+    private Directions direction; //другой вариант названия: napravlenie
+    private int column;
+    private int row;
+    private ArrayList<SchemeComponent> objects;
+    private Map map;
+    public char form;
 
     public Robot(Directions direction, int row, int column, ArrayList<SchemeComponent> objects, Map map) {
         this.direction = direction;
@@ -14,6 +14,7 @@ public class Robot {
         this.column = column;
         this.objects = objects;
         this.map = map;
+        updateForm();
         map.getCell(row, column).hasRobot = true;
     }
 
@@ -41,21 +42,26 @@ public class Robot {
         this.objects = objects;
     }
 
+    public void changeDirection(Directions newDirection){
+        direction = newDirection;
+        updateForm();
+    }
+
     public void turnLeft(){
         switch (direction){
-            case NORTH -> direction = Directions.WEST;
-            case EAST -> direction = Directions.NORTH;
-            case SOUTH -> direction =Directions.EAST;
-            case WEST -> direction = Directions.SOUTH;
+            case NORTH -> changeDirection(Directions.WEST);
+            case EAST -> changeDirection(Directions.NORTH);
+            case SOUTH -> changeDirection(Directions.EAST);
+            case WEST -> changeDirection(Directions.SOUTH);
         }
     }
 
     public void turnRight(){
         switch (direction){
-            case NORTH -> direction = Directions.EAST;
-            case EAST -> direction = Directions.SOUTH;
-            case SOUTH -> direction =Directions.WEST;
-            case WEST -> direction = Directions.NORTH;
+            case NORTH -> changeDirection(Directions.EAST);
+            case EAST -> changeDirection(Directions.SOUTH);
+            case SOUTH -> changeDirection(Directions.WEST);
+            case WEST -> changeDirection(Directions.NORTH);
         }
     }
 
@@ -97,6 +103,15 @@ public class Robot {
         };
     }
 
+    private void updateForm(){
+        switch (direction) {
+            case NORTH -> form = '^';
+            case EAST -> form = '>';
+            case SOUTH -> form = 'v';
+            case WEST -> form = '<';
+        };
+    }
+
     public void convertStringToObjects(String lsa){
         ArrayList<String> parse = ParsingHelper.SplitOperations(lsa);
         objects = ParsingHelper.ConvertToSchemeComponents(parse);
@@ -116,7 +131,7 @@ public class Robot {
                     case 2 -> turnLeft();
                     case 3 -> {
                         move();
-                        map.drawFrame();
+                        map.drawFrame(this);
                     }
                 }
                 step++;

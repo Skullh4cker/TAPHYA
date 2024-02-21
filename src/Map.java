@@ -1,5 +1,5 @@
 public class Map {
-    public Cell[][] cells;
+    private Cell[][] cells;
 
     public Map(Cell[][] cells) {
         this.cells = cells;
@@ -14,18 +14,19 @@ public class Map {
     }
 
     public Cell getCell(int row, int column){
-        //TODO: Сюда добавить проверку на выход за пределы карты
         return cells[row][column];
     }
     public CellTypes getCellType(int row, int column){
-        return getCell(row, column).getType();
+        if(row < cells.length && column < cells[0].length)
+            return getCell(row, column).getType();
+        else return CellTypes.WALL;
     }
-    public void drawFrame(){
+    public void drawFrame(Robot robot){
         for(int row = 0; row < cells.length; row++){
             for (int column = 0; column < cells[row].length; column++){
                 Cell cell = getCell(row, column);
                 if (cell.hasRobot){
-                    System.out.print("R");
+                    System.out.print(robot.form);
                 }
                 else {
                     switch (cell.getType()) {
